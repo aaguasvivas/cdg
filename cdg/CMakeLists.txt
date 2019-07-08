@@ -1,6 +1,6 @@
 add_library(SkeletonPass MODULE
     # List your source files here.
-    Skeleton.cpp
+    cdg.cpp
 )
 
 # Use C++11 to compile our pass (i.e., supply -std=c++11).
