@@ -5,4 +5,8 @@ add_definitions(${LLVM_DEFINITIONS})
 include_directories(${LLVM_INCLUDE_DIRS})
 link_directories(${LLVM_LIBRARY_DIRS})
 
-add_subdirectory(cdg)  # Use your pass name here.
+include_directories(include)
+
+set(CMAKE_CXX_STANDARD 14)
+
+add_subdirectory(cdg)
