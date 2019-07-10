@@ -23,9 +23,9 @@ using namespace llvm;
 
 namespace {
     // Module pass
-    struct DependenceCheck : public ModulePass {
+    struct DependenceCheck : public FunctionPass {
         // Default constructor
-        DependenceCheck() : ModulePass(ID) {
+        DependenceCheck() : FunctionPass(ID) {
             initializeMemoryDependenceAnalysisPass(*PassRegistry::getPassRegistry());
         }
 
@@ -37,26 +37,18 @@ namespace {
 
         static char ID; // pass ID
 
-        bool runOnModule(Module &M) override {
+        bool runOnFunction(Function &F) override {
             auto &AAWP = getAnalysis<AAResultsWrapperPass>();
             auto &AA = AAWP.getAAResults();
 
-            // Iterate over all instructions and get the memory dependence information.
-            for (auto &mi : M) {
-                // skip external functions
-                if (mi.isDeclaration())
-                    continue;
+            // Since MemoryDependenceAnalysis is a function pass, we need to pass the
+            // current function we are examining to the getAnalysis() call.
+            auto &MDA = getAnalysis<MemoryDependenceAnalysis>(F);
+            auto &PDT = getAnalysis<PostDominatorTree>(F);
 
-                // Since MemoryDependenceAnalysis is a function pass, we need to pass the
-                // current function we are examining to the getAnalysis() call.
-                auto &MDA = getAnalysis<MemoryDependenceAnalysis>(mi);
-                auto &PDT = getAnalysis<PostDominatorTree>(mi);
+            DataDep.getDataDependencies(F, MDA, AA);
 
-                DataDep.getDataDependencies(mi, MDA, AA);
-
-                ControlDep.getControlDependencies(mi, PDT);
-
-            } // end for (module::iterator)
+            ControlDep.getControlDependencies(F, PDT);
 
             // Nothing modified in IR
             return false;
@@ -69,11 +61,10 @@ namespace {
 
             // For control dependence analysis
             AU.addRequired<PostDominatorTree>();
-
             AU.setPreservesAll();
         }
 
-        void print(raw_ostream &OS, const Module *m = 0) const {
+        void print(raw_ostream &OS, const Module *m = nullptr) const {
             // dump the contents of the local Deps_ map
             OS << "Local Dependence map size: " << DataDep.LocalDeps_.size() << '\n';
             for (auto i = DataDep.LocalDeps_.begin(); i != DataDep.LocalDeps_.end(); ++i) {
