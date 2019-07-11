@@ -1,5 +1,7 @@
 add_library(CDGPass MODULE
     cdg.cpp
+    ControlDependence.cpp
+    DataDependence.cpp
 )
 
 # Use C++11 to compile our pass (i.e., supply -std=c++11).

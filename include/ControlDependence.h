@@ -22,6 +22,7 @@
 #include <map>
 #include <set>
 #include <string>
+#include <fstream>
 
 using namespace llvm;
 
@@ -86,8 +87,8 @@ class ControlDependence {
 
 
     // Inserts a properly formatted .dot (graphviz) node into the raw_fd_ostream 
-    void insertDotNode(raw_fd_ostream &out, BasicBlock *node) const;
+    void insertDotNode(std::ofstream &out, BasicBlock *node) const;
 
     // Inserts an edge from A to B (A->B) in dot syntax in the passed raw_fd_ostream
-    void insertDotEdge(raw_fd_ostream &out, BasicBlock *A, BasicBlock *B) const;
+    void insertDotEdge(std::ofstream &out, BasicBlock *A, BasicBlock *B) const;
 };
